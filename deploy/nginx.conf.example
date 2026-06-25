@@ -1,0 +1,40 @@
+# Nginx reverse proxy config for the Receipt & Client Management System
+#
+# INSTALL:
+#   sudo cp deploy/nginx.conf.example /etc/nginx/sites-available/receipt-system
+#   sudo ln -s /etc/nginx/sites-available/receipt-system /etc/nginx/sites-enabled/
+#   sudo nano /etc/nginx/sites-available/receipt-system   # replace yourdomain.com below
+#   sudo nginx -t
+#   sudo systemctl reload nginx
+#
+# THEN for HTTPS (recommended, free via Let's Encrypt):
+#   sudo apt-get install -y certbot python3-certbot-nginx
+#   sudo certbot --nginx -d yourdomain.com
+# Certbot will edit this file automatically to add the SSL server block.
+
+server {
+    listen 80;
+    server_name yourdomain.com www.yourdomain.com;
+
+    # Receipts can include uploaded logos/stamps/signatures — allow reasonably large uploads
+    client_max_body_size 10M;
+
+    location / {
+        proxy_pass http://127.0.0.1:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_cache_bypass $http_upgrade;
+    }
+
+    # Serve uploaded logos/stamps/signatures and static CSS directly via Nginx (faster than proxying)
+    location /public/ {
+        alias /var/www/receipt-system/public/;
+        expires 30d;
+        access_log off;
+    }
+}
