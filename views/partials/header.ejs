@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= typeof title !== 'undefined' ? title + ' – ' : '' %>Receipt & Client Manager</title>
+  <link rel="stylesheet" href="/public/css/style.css">
+</head>
+<body>
+<div class="app-shell">
+  <aside class="sidebar">
+    <div class="brand">🧾 ReceiptPro</div>
+    <nav>
+      <a class="nav-link <%= path === '/dashboard' ? 'active' : '' %>" href="/dashboard">Dashboard</a>
+      <div class="section-label">Documents</div>
+      <a class="nav-link <%= path && path.startsWith('/quotations') ? 'active' : '' %>" href="/quotations">Quotations</a>
+      <a class="nav-link <%= path && path.startsWith('/invoices') ? 'active' : '' %>" href="/invoices">Invoices</a>
+      <a class="nav-link <%= path && path.startsWith('/receipts') ? 'active' : '' %>" href="/receipts">Receipts</a>
+      <a class="nav-link <%= path && path.startsWith('/agreements') ? 'active' : '' %>" href="/agreements">Agreement Forms</a>
+      <div class="section-label">Manage</div>
+      <a class="nav-link <%= path && path.startsWith('/clients') ? 'active' : '' %>" href="/clients">Clients</a>
+      <a class="nav-link <%= path && path.startsWith('/reports') ? 'active' : '' %>" href="/reports">Reports</a>
+      <a class="nav-link <%= path === '/verify' ? 'active' : '' %>" href="/verify" target="_blank">Verify a Document</a>
+      <% if (currentUser && currentUser.role === 'admin') { %>
+        <div class="section-label">Admin</div>
+        <a class="nav-link <%= path === '/settings' ? 'active' : '' %>" href="/settings">Company Settings</a>
+        <a class="nav-link <%= path === '/gallery' ? 'active' : '' %>" href="/gallery">Website Photos</a>
+        <a class="nav-link <%= path === '/users' ? 'active' : '' %>" href="/users">User Accounts</a>
+        <a class="nav-link <%= path === '/users/logs' ? 'active' : '' %>" href="/users/logs">Activity Logs</a>
+      <% } %>
+    </nav>
+    <% if (currentUser) { %>
+    <div class="user-box">
+      <div><strong><%= currentUser.name %></strong></div>
+      <div style="color:#94a3b8; text-transform:capitalize;"><%= currentUser.role %></div>
+      <form method="POST" action="/logout"><button type="submit">Log out</button></form>
+    </div>
+    <% } %>
+  </aside>
+  <div class="main">
