@@ -1,0 +1,109 @@
+<%- include('partials/header', { title: 'Dashboard' }) %>
+  <div class="topbar">
+    <h1>Dashboard</h1>
+    <a href="/receipts/new" class="btn btn-primary">+ New Receipt</a>
+  </div>
+  <div class="content">
+    <div class="grid grid-4">
+      <div class="card stat-card">
+        <div class="stat-label">Quotations</div>
+        <div class="stat-value"><%= docCounts.quotation %></div>
+      </div>
+      <div class="card stat-card">
+        <div class="stat-label">Invoices</div>
+        <div class="stat-value"><%= docCounts.invoice %></div>
+      </div>
+      <div class="card stat-card">
+        <div class="stat-label">Receipts</div>
+        <div class="stat-value"><%= docCounts.receipt %></div>
+      </div>
+      <div class="card stat-card">
+        <div class="stat-label">Agreement Forms</div>
+        <div class="stat-value"><%= docCounts.agreement %></div>
+      </div>
+    </div>
+
+    <div class="grid grid-4" style="margin-top:16px;">
+      <div class="card stat-card">
+        <div class="stat-label">Total Clients</div>
+        <div class="stat-value"><%= totalClients %></div>
+      </div>
+      <div class="card stat-card">
+        <div class="stat-label">Total Revenue (Receipts)</div>
+        <div class="stat-value">KES <%= totalRevenue.toLocaleString('en-KE', {minimumFractionDigits:2}) %></div>
+      </div>
+      <div class="card stat-card">
+        <div class="stat-label">This Month</div>
+        <div class="stat-value">KES <%= monthRevenue.toLocaleString('en-KE', {minimumFractionDigits:2}) %></div>
+      </div>
+      <div class="card stat-card">
+        <div class="stat-label">Outstanding Invoices</div>
+        <div class="stat-value">KES <%= outstandingInvoices.toLocaleString('en-KE', {minimumFractionDigits:2}) %></div>
+      </div>
+    </div>
+
+    <div class="grid grid-2" style="margin-top:20px;">
+      <div class="card">
+        <h3 style="margin-top:0;">Daily Revenue (last 7 days)</h3>
+        <table class="data-table">
+          <thead><tr><th>Date</th><th>Receipts</th><th>Revenue (KES)</th></tr></thead>
+          <tbody>
+            <% dailySummary.forEach(d => { %>
+              <tr><td><%= d.day %></td><td><%= d.count %></td><td><%= d.revenue.toLocaleString('en-KE',{minimumFractionDigits:2}) %></td></tr>
+            <% }) %>
+            <% if (!dailySummary.length) { %><tr><td colspan="3" style="color:#94a3b8;">No finalized receipts yet this week.</td></tr><% } %>
+          </tbody>
+        </table>
+      </div>
+      <div class="card">
+        <h3 style="margin-top:0;">Monthly Revenue (last 6 months)</h3>
+        <table class="data-table">
+          <thead><tr><th>Month</th><th>Receipts</th><th>Revenue (KES)</th></tr></thead>
+          <tbody>
+            <% monthlySummary.forEach(m => { %>
+              <tr><td><%= m.month %></td><td><%= m.count %></td><td><%= m.revenue.toLocaleString('en-KE',{minimumFractionDigits:2}) %></td></tr>
+            <% }) %>
+            <% if (!monthlySummary.length) { %><tr><td colspan="3" style="color:#94a3b8;">No finalized receipts yet.</td></tr><% } %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="grid grid-2" style="margin-top:20px;">
+      <div class="card">
+        <h3 style="margin-top:0;">Recent Documents</h3>
+        <table class="data-table">
+          <thead><tr><th>Number</th><th>Type</th><th>Client</th><th>Status</th><th>Total</th></tr></thead>
+          <tbody>
+            <% recentDocuments.forEach(d => { %>
+              <tr>
+                <td><a href="/<%= d.doc_type %>s/<%= d.id %>"><%= d.doc_number %></a></td>
+                <td style="text-transform:capitalize;"><%= d.doc_type %></td>
+                <td><%= d.customer_name %></td>
+                <td><span class="badge badge-<%= d.status %>"><%= d.status %></span></td>
+                <td>KES <%= d.total.toLocaleString('en-KE',{minimumFractionDigits:2}) %></td>
+              </tr>
+            <% }) %>
+            <% if (!recentDocuments.length) { %><tr><td colspan="5" style="color:#94a3b8;">No documents yet.</td></tr><% } %>
+          </tbody>
+        </table>
+      </div>
+      <div class="card">
+        <h3 style="margin-top:0;">Recent Clients</h3>
+        <table class="data-table">
+          <thead><tr><th>Name</th><th>Phone</th><th>Since</th></tr></thead>
+          <tbody>
+            <% recentClients.forEach(c => { %>
+              <tr>
+                <td><a href="/clients/<%= c.id %>"><%= c.name %></a></td>
+                <td><%= c.phone || '—' %></td>
+                <td><%= c.created_at %></td>
+              </tr>
+            <% }) %>
+            <% if (!recentClients.length) { %><tr><td colspan="3" style="color:#94a3b8;">No clients yet.</td></tr><% } %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+<%- include('partials/footer') %>
