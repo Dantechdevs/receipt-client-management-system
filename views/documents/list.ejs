@@ -1,0 +1,52 @@
+<%- include('../partials/header', { title: config.labelPlural }) %>
+  <div class="topbar">
+    <h1><%= config.labelPlural %></h1>
+    <a href="<%= config.basePath %>/new" class="btn btn-primary">+ New <%= config.label %></a>
+  </div>
+  <div class="content">
+    <form class="search-bar" method="GET" action="<%= config.basePath %>">
+      <input type="text" name="q" placeholder="Search by number, code, or client name" value="<%= query.q || '' %>" style="min-width:280px;">
+      <input type="date" name="from" value="<%= query.from || '' %>">
+      <input type="date" name="to" value="<%= query.to || '' %>">
+      <select name="status">
+        <option value="">All statuses</option>
+        <% config.statuses.forEach(s => { %>
+          <option value="<%= s %>" <%= query.status === s ? 'selected' : '' %>><%= s.charAt(0).toUpperCase() + s.slice(1) %></option>
+        <% }) %>
+      </select>
+      <button class="btn" type="submit">Filter</button>
+      <a class="btn" href="<%= config.basePath %>">Reset</a>
+    </form>
+
+    <div class="card">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th><%= config.label %> No.</th><th>Date</th><th>Client</th><th>Verification Code</th>
+            <% if (config.hasDueDate) { %><th>Due Date</th><% } %>
+            <% if (config.hasPaymentStatus) { %><th>Payment</th><% } %>
+            <th>Status</th><th>Total (KES)</th><th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <% documents.forEach(d => { %>
+            <tr>
+              <td><a href="<%= config.basePath %>/<%= d.id %>"><%= d.doc_number %></a></td>
+              <td><%= new Date(d.issue_date).toLocaleDateString('en-GB') %></td>
+              <td><%= d.customer_name %></td>
+              <td><code><%= d.verification_code %></code></td>
+              <% if (config.hasDueDate) { %><td><%= d.due_date ? new Date(d.due_date).toLocaleDateString('en-GB') : '—' %></td><% } %>
+              <% if (config.hasPaymentStatus) { %><td><%= d.payment_status || '—' %></td><% } %>
+              <td><span class="badge badge-<%= d.status %>"><%= d.status %></span></td>
+              <td><%= d.total.toLocaleString('en-KE',{minimumFractionDigits:2}) %></td>
+              <td><a class="btn btn-sm" href="<%= config.basePath %>/<%= d.id %>">View</a></td>
+            </tr>
+          <% }) %>
+          <% if (!documents.length) { %>
+            <tr><td colspan="9" style="color:#94a3b8; text-align:center; padding:30px;">No <%= config.labelPlural.toLowerCase() %> match your search.</td></tr>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+<%- include('../partials/footer') %>
