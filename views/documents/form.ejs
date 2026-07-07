@@ -1,0 +1,188 @@
+<%- include('../partials/header', { title: doc ? `Edit ${config.label}` : `New ${config.label}` }) %>
+  <div class="topbar">
+    <h1><%= doc ? `Edit ${config.label} ${doc.doc_number}` : `New ${config.label}` %></h1>
+    <a href="<%= config.basePath %>" class="btn">Cancel</a>
+  </div>
+  <div class="content">
+    <form method="POST" action="<%= doc ? `${config.basePath}/${doc.id}?_method=PUT` : config.basePath %>" id="docForm">
+      <div class="grid grid-2">
+        <div class="card">
+          <h3 style="margin-top:0;">Customer Details</h3>
+          <div class="form-group">
+            <label>Customer Name *</label>
+            <input class="form-control" type="text" name="customer_name" required value="<%= doc ? doc.customer_name : '' %>">
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Phone Number</label>
+              <input class="form-control" type="text" name="customer_phone" placeholder="e.g. 0712345678" value="<%= doc ? (doc.customer_phone || '') : '' %>">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Address (optional)</label>
+            <input class="form-control" type="text" name="customer_address" value="<%= doc ? (doc.customer_address || '') : '' %>">
+          </div>
+        </div>
+        <div class="card">
+          <h3 style="margin-top:0;"><%= config.label %> Details</h3>
+          <div class="form-group">
+            <label>Status</label>
+            <select class="form-control" name="status">
+              <% config.statuses.forEach(s => { %>
+                <option value="<%= s %>" <%= (doc ? doc.status === s : s === config.defaultStatus) ? 'selected' : '' %>><%= s.charAt(0).toUpperCase() + s.slice(1) %></option>
+              <% }) %>
+            </select>
+          </div>
+          <% if (config.hasValidUntil) { %>
+          <div class="form-group">
+            <label>Valid Until</label>
+            <input class="form-control" type="date" name="valid_until" value="<%= doc && doc.valid_until ? doc.valid_until.substring(0,10) : '' %>">
+          </div>
+          <% } %>
+          <% if (config.hasDueDate) { %>
+          <div class="form-group">
+            <label>Due Date</label>
+            <input class="form-control" type="date" name="due_date" value="<%= doc && doc.due_date ? doc.due_date.substring(0,10) : '' %>">
+          </div>
+          <% } %>
+          <% if (config.hasPaymentStatus) { %>
+          <div class="form-group">
+            <label>Payment Status</label>
+            <select class="form-control" name="payment_status">
+              <option value="unpaid" <%= (!doc || doc.payment_status==='unpaid') ? 'selected' : '' %>>Unpaid</option>
+              <option value="partial" <%= (doc && doc.payment_status==='partial') ? 'selected' : '' %>>Partial</option>
+              <option value="paid" <%= (doc && doc.payment_status==='paid') ? 'selected' : '' %>>Paid</option>
+            </select>
+          </div>
+          <% } %>
+          <% if (config.hasPaymentMethod) { %>
+          <div class="form-group">
+            <label>Payment Method</label>
+            <select class="form-control" name="payment_method">
+              <option value="">— Select —</option>
+              <option value="Cash" <%= (doc && doc.payment_method==='Cash') ? 'selected' : '' %>>Cash</option>
+              <option value="M-Pesa" <%= (doc && doc.payment_method==='M-Pesa') ? 'selected' : '' %>>M-Pesa</option>
+              <option value="Bank Transfer" <%= (doc && doc.payment_method==='Bank Transfer') ? 'selected' : '' %>>Bank Transfer</option>
+              <option value="Card" <%= (doc && doc.payment_method==='Card') ? 'selected' : '' %>>Card</option>
+              <option value="Cheque" <%= (doc && doc.payment_method==='Cheque') ? 'selected' : '' %>>Cheque</option>
+            </select>
+          </div>
+          <% } %>
+          <div class="form-group">
+            <label>Notes</label>
+            <textarea class="form-control" name="notes" rows="3"><%= doc ? (doc.notes || '') : '' %></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:16px;">
+        <h3 style="margin-top:0;">Items</h3>
+        <table class="data-table items-table" id="itemsTable">
+          <thead>
+            <tr><th style="width:45%;">Description</th><th>Qty</th><th>Unit Price</th><th>Line Total</th><th></th></tr>
+          </thead>
+          <tbody id="itemsBody">
+            <% items.forEach((it) => { %>
+            <tr>
+              <td><input class="form-control" name="descriptions" value="<%= it.description %>" placeholder="Service or product description"></td>
+              <td><input class="form-control qty" type="number" step="0.01" min="0" name="quantities" value="<%= it.quantity %>"></td>
+              <td><input class="form-control price" type="number" step="0.01" min="0" name="unit_prices" value="<%= it.unit_price %>"></td>
+              <td class="lineTotal">0.00</td>
+              <td><button type="button" class="remove-row" onclick="removeRow(this)">✕</button></td>
+            </tr>
+            <% }) %>
+          </tbody>
+        </table>
+        <button type="button" class="btn btn-sm" onclick="addRow()" style="margin-top:10px;">+ Add Item</button>
+
+        <div style="border-top:1px solid #e2e8f0; margin-top:18px; padding-top:14px;">
+          <label style="display:flex; align-items:center; gap:8px; font-size:13px; font-weight:600; color:#334155; cursor:pointer;">
+            <input type="checkbox" id="applyTaxCheckbox" name="apply_tax" <%= (doc && doc.tax_rate > 0) ? 'checked' : '' %> style="width:auto;">
+            Apply tax to this <%= config.label.toLowerCase() %>
+          </label>
+          <div id="taxFields" style="display:<%= (doc && doc.tax_rate > 0) ? 'flex' : 'none' %>; gap:14px; margin-top:10px; max-width:420px;">
+            <div class="form-group" style="flex:1;">
+              <label>Tax Label</label>
+              <input class="form-control" name="tax_label" id="taxLabelInput" value="<%= doc ? (doc.tax_label || company.default_tax_label || 'VAT') : (company.default_tax_label || 'VAT') %>">
+            </div>
+            <div class="form-group" style="flex:1;">
+              <label>Tax Rate (%)</label>
+              <input class="form-control" type="number" step="0.01" min="0" name="tax_rate" id="taxRateInput" value="<%= doc ? (doc.tax_rate || company.default_tax_rate || 0) : (company.default_tax_rate || 0) %>">
+            </div>
+          </div>
+        </div>
+
+        <div style="text-align:right; margin-top:16px; font-size:13.5px; color:#475569;">
+          <div>Subtotal: KES <span id="subtotalDisplay">0.00</span></div>
+          <div id="taxLine" style="display:none;"><span id="taxLineLabel">Tax</span>: KES <span id="taxAmountDisplay">0.00</span></div>
+          <div style="font-size:16px; font-weight:700; color:#0f172a; margin-top:4px;">Total: KES <span id="grandTotal">0.00</span></div>
+        </div>
+      </div>
+
+      <div style="margin-top:16px; display:flex; gap:10px;">
+        <button type="submit" class="btn btn-primary"><%= doc ? 'Save Changes' : `Create ${config.label}` %></button>
+        <a href="<%= config.basePath %>" class="btn">Cancel</a>
+      </div>
+    </form>
+  </div>
+
+<script>
+function rowTemplate() {
+  const tr = document.createElement('tr');
+  tr.innerHTML = `
+    <td><input class="form-control" name="descriptions" placeholder="Service or product description"></td>
+    <td><input class="form-control qty" type="number" step="0.01" min="0" name="quantities" value="1"></td>
+    <td><input class="form-control price" type="number" step="0.01" min="0" name="unit_prices" value="0"></td>
+    <td class="lineTotal">0.00</td>
+    <td><button type="button" class="remove-row" onclick="removeRow(this)">✕</button></td>
+  `;
+  return tr;
+}
+function addRow() {
+  document.getElementById('itemsBody').appendChild(rowTemplate());
+  attachListeners();
+  recalc();
+}
+function removeRow(btn) {
+  const rows = document.querySelectorAll('#itemsBody tr');
+  if (rows.length > 1) btn.closest('tr').remove();
+  recalc();
+}
+function recalc() {
+  let subtotal = 0;
+  document.querySelectorAll('#itemsBody tr').forEach(tr => {
+    const qty = parseFloat(tr.querySelector('.qty').value) || 0;
+    const price = parseFloat(tr.querySelector('.price').value) || 0;
+    const total = qty * price;
+    tr.querySelector('.lineTotal').textContent = total.toLocaleString('en-KE', {minimumFractionDigits:2});
+    subtotal += total;
+  });
+
+  const taxEnabled = document.getElementById('applyTaxCheckbox').checked;
+  const taxRate = taxEnabled ? (parseFloat(document.getElementById('taxRateInput').value) || 0) : 0;
+  const taxLabel = document.getElementById('taxLabelInput').value || 'Tax';
+  const taxAmount = subtotal * (taxRate / 100);
+  const grand = subtotal + taxAmount;
+
+  document.getElementById('subtotalDisplay').textContent = subtotal.toLocaleString('en-KE', {minimumFractionDigits:2});
+  document.getElementById('taxLine').style.display = taxEnabled && taxRate > 0 ? 'block' : 'none';
+  document.getElementById('taxLineLabel').textContent = `${taxLabel} (${taxRate}%)`;
+  document.getElementById('taxAmountDisplay').textContent = taxAmount.toLocaleString('en-KE', {minimumFractionDigits:2});
+  document.getElementById('grandTotal').textContent = grand.toLocaleString('en-KE', {minimumFractionDigits:2});
+}
+document.getElementById('applyTaxCheckbox').addEventListener('change', (e) => {
+  document.getElementById('taxFields').style.display = e.target.checked ? 'flex' : 'none';
+  recalc();
+});
+document.getElementById('taxRateInput').addEventListener('input', recalc);
+document.getElementById('taxLabelInput').addEventListener('input', recalc);
+function attachListeners() {
+  document.querySelectorAll('#itemsBody .qty, #itemsBody .price').forEach(el => {
+    el.removeEventListener('input', recalc);
+    el.addEventListener('input', recalc);
+  });
+}
+attachListeners();
+recalc();
+</script>
+<%- include('../partials/footer') %>
