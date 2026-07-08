@@ -1,0 +1,88 @@
+<%- include('../partials/header', { title: doc.doc_number }) %>
+  <div class="topbar">
+    <h1><%= doc.doc_number %> <span class="badge badge-<%= doc.status %>"><%= doc.status %></span></h1>
+    <div style="display:flex; gap:8px; flex-wrap:wrap;">
+      <% if (!config.lockedStatuses.includes(doc.status)) { %>
+        <a class="btn" href="<%= config.basePath %>/<%= doc.id %>/edit">Edit</a>
+      <% } %>
+      <a class="btn" href="<%= config.basePath %>/<%= doc.id %>/pdf" target="_blank">Download PDF</a>
+      <a class="btn" href="<%= config.basePath %>/<%= doc.id %>/pdf?duplicate=1" target="_blank">Print Duplicate</a>
+      <form method="POST" action="<%= config.basePath %>/<%= doc.id %>/duplicate" style="display:inline;">
+        <button class="btn" type="submit">Duplicate</button>
+      </form>
+      <% if (config.convertsTo && config.convertWhenStatus.includes(doc.status) && !doc.converted_to_id) { %>
+        <form method="POST" action="<%= config.basePath %>/<%= doc.id %>/convert" style="display:inline;">
+          <button class="btn btn-primary" type="submit"><%= config.convertLabel %></button>
+        </form>
+      <% } %>
+      <% if (doc.status !== 'void') { %>
+      <form method="POST" action="<%= config.basePath %>/<%= doc.id %>/void" style="display:inline;" onsubmit="return confirm('Void this document? This cannot be undone.');">
+        <button class="btn btn-danger" type="submit">Void</button>
+      </form>
+      <% } %>
+    </div>
+  </div>
+  <div class="content">
+    <% if (convertedFrom || convertedTo) { %>
+      <div class="card" style="margin-bottom:16px; background:#eff6ff; border-color:#bfdbfe;">
+        <% if (convertedFrom) { %><p style="margin:0 0 4px;">↩ Converted from <a href="/<%= convertedFrom.doc_type %>s/<%= convertedFrom.id %>"><%= convertedFrom.doc_number %></a></p><% } %>
+        <% if (convertedTo) { %><p style="margin:0;">↪ Converted to <a href="/<%= convertedTo.doc_type %>s/<%= convertedTo.id %>"><%= convertedTo.doc_number %></a></p><% } %>
+      </div>
+    <% } %>
+
+    <div class="grid grid-2">
+      <div class="card">
+        <h3 style="margin-top:0;"><%= config.label %> Info</h3>
+        <p><strong><%= config.label %> No:</strong> <%= doc.doc_number %></p>
+        <p><strong>Verification Code:</strong> <code><%= doc.verification_code %></code></p>
+        <p><strong>Date:</strong> <%= new Date(doc.issue_date).toLocaleString('en-GB') %></p>
+        <% if (config.hasValidUntil && doc.valid_until) { %><p><strong>Valid Until:</strong> <%= new Date(doc.valid_until).toLocaleDateString('en-GB') %></p><% } %>
+        <% if (config.hasDueDate && doc.due_date) { %><p><strong>Due Date:</strong> <%= new Date(doc.due_date).toLocaleDateString('en-GB') %></p><% } %>
+        <% if (config.hasPaymentStatus) { %><p><strong>Payment Status:</strong> <%= doc.payment_status || 'unpaid' %></p><% } %>
+        <% if (config.hasPaymentMethod && doc.payment_method) { %><p><strong>Payment Method:</strong> <%= doc.payment_method %></p><% } %>
+        <p><strong>Status:</strong> <span class="badge badge-<%= doc.status %>"><%= doc.status %></span></p>
+      </div>
+      <div class="card">
+        <h3 style="margin-top:0;">Customer</h3>
+        <p><strong>Name:</strong> <%= doc.customer_name %></p>
+        <p><strong>Phone:</strong> <%= doc.customer_phone || '—' %></p>
+        <p><strong>Address:</strong> <%= doc.customer_address || '—' %></p>
+        <% if (doc.client_id) { %><p><a href="/clients/<%= doc.client_id %>">View client profile →</a></p><% } %>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:16px;">
+      <h3 style="margin-top:0;">Items</h3>
+      <table class="data-table">
+        <thead><tr><th>Description</th><th>Qty</th><th>Unit Price</th><th>Line Total</th></tr></thead>
+        <tbody>
+          <% items.forEach(it => { %>
+            <tr>
+              <td><%= it.description %></td>
+              <td><%= it.quantity %></td>
+              <td><%= it.unit_price.toLocaleString('en-KE',{minimumFractionDigits:2}) %></td>
+              <td><%= it.line_total.toLocaleString('en-KE',{minimumFractionDigits:2}) %></td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+      <div style="text-align:right; margin-top:14px;">
+        <% if (doc.tax_rate && doc.tax_rate > 0) { %>
+          <div style="font-size:13.5px; color:#475569;">Subtotal: KES <%= doc.subtotal.toLocaleString('en-KE',{minimumFractionDigits:2}) %></div>
+          <div style="font-size:13.5px; color:#475569;"><%= doc.tax_label || 'Tax' %> (<%= doc.tax_rate %>%): KES <%= doc.tax_amount.toLocaleString('en-KE',{minimumFractionDigits:2}) %></div>
+        <% } %>
+        <div style="font-size:16px; font-weight:700; margin-top:4px;">
+          Total: KES <%= doc.total.toLocaleString('en-KE',{minimumFractionDigits:2}) %>
+        </div>
+      </div>
+      <% if (docType === 'quotation') { %>
+        <p style="margin-top:14px; padding:10px 14px; background:#fffbeb; border:1px solid #fde68a; border-radius:6px; color:#92400e; font-size:12.5px;">
+          This is a quotation only, not a tax invoice.<% if (doc.valid_until) { %> Prices valid until <%= new Date(doc.valid_until).toLocaleDateString('en-GB') %>.<% } %>
+        </p>
+      <% } %>
+      <% if (doc.notes) { %>
+        <p style="margin-top:14px; color:#475569;"><strong>Notes:</strong> <%= doc.notes %></p>
+      <% } %>
+    </div>
+  </div>
+<%- include('../partials/footer') %>
