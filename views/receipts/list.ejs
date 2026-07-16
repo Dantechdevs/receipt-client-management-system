@@ -1,0 +1,45 @@
+<%- include('../partials/header', { title: 'Receipts' }) %>
+  <div class="topbar">
+    <h1>Receipts</h1>
+    <a href="/receipts/new" class="btn btn-primary">+ New Receipt</a>
+  </div>
+  <div class="content">
+    <form class="search-bar" method="GET" action="/receipts">
+      <input type="text" name="q" placeholder="Search by receipt no, code, or client name" value="<%= query.q || '' %>" style="min-width:280px;">
+      <input type="date" name="from" value="<%= query.from || '' %>">
+      <input type="date" name="to" value="<%= query.to || '' %>">
+      <select name="status">
+        <option value="">All statuses</option>
+        <option value="draft" <%= query.status === 'draft' ? 'selected' : '' %>>Draft</option>
+        <option value="final" <%= query.status === 'final' ? 'selected' : '' %>>Final</option>
+        <option value="void" <%= query.status === 'void' ? 'selected' : '' %>>Void</option>
+      </select>
+      <button class="btn" type="submit">Filter</button>
+      <a class="btn" href="/receipts">Reset</a>
+    </form>
+
+    <div class="card">
+      <table class="data-table">
+        <thead>
+          <tr><th>Receipt No.</th><th>Date</th><th>Client</th><th>Verification Code</th><th>Status</th><th>Total (KES)</th><th></th></tr>
+        </thead>
+        <tbody>
+          <% receipts.forEach(r => { %>
+            <tr>
+              <td><a href="/receipts/<%= r.id %>"><%= r.receipt_number %></a></td>
+              <td><%= new Date(r.issue_date).toLocaleDateString('en-GB') %></td>
+              <td><%= r.customer_name %></td>
+              <td><code><%= r.verification_code %></code></td>
+              <td><span class="badge badge-<%= r.status %>"><%= r.status %></span></td>
+              <td><%= r.total.toLocaleString('en-KE',{minimumFractionDigits:2}) %></td>
+              <td><a class="btn btn-sm" href="/receipts/<%= r.id %>">View</a></td>
+            </tr>
+          <% }) %>
+          <% if (!receipts.length) { %>
+            <tr><td colspan="7" style="color:#94a3b8; text-align:center; padding:30px;">No receipts match your search.</td></tr>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+<%- include('../partials/footer') %>
