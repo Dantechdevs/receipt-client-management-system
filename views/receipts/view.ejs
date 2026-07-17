@@ -1,0 +1,61 @@
+<%- include('../partials/header', { title: receipt.receipt_number }) %>
+  <div class="topbar">
+    <h1><%= receipt.receipt_number %> <span class="badge badge-<%= receipt.status %>"><%= receipt.status %></span></h1>
+    <div style="display:flex; gap:8px;">
+      <% if (receipt.status === 'draft') { %>
+        <a class="btn" href="/receipts/<%= receipt.id %>/edit">Edit</a>
+      <% } %>
+      <a class="btn" href="/receipts/<%= receipt.id %>/pdf" target="_blank">Download PDF</a>
+      <a class="btn" href="/receipts/<%= receipt.id %>/pdf?duplicate=1" target="_blank">Print Duplicate</a>
+      <form method="POST" action="/receipts/<%= receipt.id %>/duplicate" style="display:inline;">
+        <button class="btn" type="submit">Duplicate Receipt</button>
+      </form>
+      <% if (receipt.status !== 'void') { %>
+      <form method="POST" action="/receipts/<%= receipt.id %>/void" style="display:inline;" onsubmit="return confirm('Void this receipt? This cannot be undone.');">
+        <button class="btn btn-danger" type="submit">Void</button>
+      </form>
+      <% } %>
+    </div>
+  </div>
+  <div class="content">
+    <div class="grid grid-2">
+      <div class="card">
+        <h3 style="margin-top:0;">Receipt Info</h3>
+        <p><strong>Receipt No:</strong> <%= receipt.receipt_number %></p>
+        <p><strong>Verification Code:</strong> <code><%= receipt.verification_code %></code></p>
+        <p><strong>Date:</strong> <%= new Date(receipt.issue_date).toLocaleString('en-GB') %></p>
+        <p><strong>Status:</strong> <span class="badge badge-<%= receipt.status %>"><%= receipt.status %></span></p>
+      </div>
+      <div class="card">
+        <h3 style="margin-top:0;">Customer</h3>
+        <p><strong>Name:</strong> <%= receipt.customer_name %></p>
+        <p><strong>Phone:</strong> <%= receipt.customer_phone || '—' %></p>
+        <p><strong>Address:</strong> <%= receipt.customer_address || '—' %></p>
+        <% if (receipt.client_id) { %><p><a href="/clients/<%= receipt.client_id %>">View client profile →</a></p><% } %>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:16px;">
+      <h3 style="margin-top:0;">Items</h3>
+      <table class="data-table">
+        <thead><tr><th>Description</th><th>Qty</th><th>Unit Price</th><th>Line Total</th></tr></thead>
+        <tbody>
+          <% items.forEach(it => { %>
+            <tr>
+              <td><%= it.description %></td>
+              <td><%= it.quantity %></td>
+              <td><%= it.unit_price.toLocaleString('en-KE',{minimumFractionDigits:2}) %></td>
+              <td><%= it.line_total.toLocaleString('en-KE',{minimumFractionDigits:2}) %></td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+      <div style="text-align:right; margin-top:14px; font-size:16px; font-weight:700;">
+        Total: KES <%= receipt.total.toLocaleString('en-KE',{minimumFractionDigits:2}) %>
+      </div>
+      <% if (receipt.notes) { %>
+        <p style="margin-top:14px; color:#475569;"><strong>Notes:</strong> <%= receipt.notes %></p>
+      <% } %>
+    </div>
+  </div>
+<%- include('../partials/footer') %>
