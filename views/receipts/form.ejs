@@ -1,0 +1,115 @@
+<%- include('../partials/header', { title: receipt ? 'Edit Receipt' : 'New Receipt' }) %>
+  <div class="topbar">
+    <h1><%= receipt ? `Edit Receipt ${receipt.receipt_number}` : 'New Receipt' %></h1>
+    <a href="/receipts" class="btn">Cancel</a>
+  </div>
+  <div class="content">
+    <form method="POST" action="<%= receipt ? `/receipts/${receipt.id}?_method=PUT` : '/receipts' %>" id="receiptForm">
+      <div class="grid grid-2">
+        <div class="card">
+          <h3 style="margin-top:0;">Customer Details</h3>
+          <div class="form-group">
+            <label>Customer Name *</label>
+            <input class="form-control" type="text" name="customer_name" required value="<%= receipt ? receipt.customer_name : '' %>">
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Phone Number</label>
+              <input class="form-control" type="text" name="customer_phone" placeholder="e.g. 0712345678" value="<%= receipt ? (receipt.customer_phone || '') : '' %>">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Address (optional)</label>
+            <input class="form-control" type="text" name="customer_address" value="<%= receipt ? (receipt.customer_address || '') : '' %>">
+          </div>
+        </div>
+        <div class="card">
+          <h3 style="margin-top:0;">Receipt Details</h3>
+          <div class="form-group">
+            <label>Status</label>
+            <select class="form-control" name="status">
+              <option value="draft" <%= (!receipt || receipt.status === 'draft') ? 'selected' : '' %>>Draft (editable)</option>
+              <option value="final" <%= (receipt && receipt.status === 'final') ? 'selected' : '' %>>Final (locks receipt)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Notes</label>
+            <textarea class="form-control" name="notes" rows="3"><%= receipt ? (receipt.notes || '') : '' %></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:16px;">
+        <h3 style="margin-top:0;">Items</h3>
+        <table class="data-table items-table" id="itemsTable">
+          <thead>
+            <tr><th style="width:45%;">Description</th><th>Qty</th><th>Unit Price</th><th>Line Total</th><th></th></tr>
+          </thead>
+          <tbody id="itemsBody">
+            <% items.forEach((it, i) => { %>
+            <tr>
+              <td><input class="form-control" name="descriptions" value="<%= it.description %>" placeholder="Service or product description"></td>
+              <td><input class="form-control qty" type="number" step="0.01" min="0" name="quantities" value="<%= it.quantity %>"></td>
+              <td><input class="form-control price" type="number" step="0.01" min="0" name="unit_prices" value="<%= it.unit_price %>"></td>
+              <td class="lineTotal">0.00</td>
+              <td><button type="button" class="remove-row" onclick="removeRow(this)">✕</button></td>
+            </tr>
+            <% }) %>
+          </tbody>
+        </table>
+        <button type="button" class="btn btn-sm" onclick="addRow()" style="margin-top:10px;">+ Add Item</button>
+        <div style="text-align:right; margin-top:16px; font-size:16px; font-weight:700;">
+          Total: KES <span id="grandTotal">0.00</span>
+        </div>
+      </div>
+
+      <div style="margin-top:16px; display:flex; gap:10px;">
+        <button type="submit" class="btn btn-primary"><%= receipt ? 'Save Changes' : 'Create Receipt' %></button>
+        <a href="/receipts" class="btn">Cancel</a>
+      </div>
+    </form>
+  </div>
+
+<script>
+function rowTemplate() {
+  const tr = document.createElement('tr');
+  tr.innerHTML = `
+    <td><input class="form-control" name="descriptions" placeholder="Service or product description"></td>
+    <td><input class="form-control qty" type="number" step="0.01" min="0" name="quantities" value="1"></td>
+    <td><input class="form-control price" type="number" step="0.01" min="0" name="unit_prices" value="0"></td>
+    <td class="lineTotal">0.00</td>
+    <td><button type="button" class="remove-row" onclick="removeRow(this)">✕</button></td>
+  `;
+  return tr;
+}
+function addRow() {
+  document.getElementById('itemsBody').appendChild(rowTemplate());
+  attachListeners();
+  recalc();
+}
+function removeRow(btn) {
+  const rows = document.querySelectorAll('#itemsBody tr');
+  if (rows.length > 1) btn.closest('tr').remove();
+  recalc();
+}
+function recalc() {
+  let grand = 0;
+  document.querySelectorAll('#itemsBody tr').forEach(tr => {
+    const qty = parseFloat(tr.querySelector('.qty').value) || 0;
+    const price = parseFloat(tr.querySelector('.price').value) || 0;
+    const total = qty * price;
+    tr.querySelector('.lineTotal').textContent = total.toLocaleString('en-KE', {minimumFractionDigits:2});
+    grand += total;
+  });
+  document.getElementById('grandTotal').textContent = grand.toLocaleString('en-KE', {minimumFractionDigits:2});
+}
+function attachListeners() {
+  document.querySelectorAll('#itemsBody .qty, #itemsBody .price').forEach(el => {
+    el.removeEventListener('input', recalc);
+    el.addEventListener('input', recalc);
+  });
+}
+attachListeners();
+recalc();
+</script>
+<%- include('../partials/footer') %>
