@@ -1,0 +1,44 @@
+<%- include('../partials/header', { title: 'Agreement Forms' }) %>
+  <div class="topbar">
+    <h1>Agreement Forms</h1>
+    <a href="/agreements/new" class="btn btn-primary">+ New Agreement</a>
+  </div>
+  <div class="content">
+    <form class="search-bar" method="GET" action="/agreements">
+      <input type="text" name="q" placeholder="Search by number, code, or client name" value="<%= query.q || '' %>" style="min-width:280px;">
+      <input type="date" name="from" value="<%= query.from || '' %>">
+      <input type="date" name="to" value="<%= query.to || '' %>">
+      <select name="status">
+        <option value="">All statuses</option>
+        <% config.statuses.forEach(s => { %>
+          <option value="<%= s %>" <%= query.status === s ? 'selected' : '' %>><%= s.charAt(0).toUpperCase() + s.slice(1) %></option>
+        <% }) %>
+      </select>
+      <button class="btn" type="submit">Filter</button>
+      <a class="btn" href="/agreements">Reset</a>
+    </form>
+
+    <div class="card">
+      <table class="data-table">
+        <thead>
+          <tr><th>Agreement No.</th><th>Date</th><th>Client</th><th>Verification Code</th><th>Status</th><th></th></tr>
+        </thead>
+        <tbody>
+          <% documents.forEach(d => { %>
+            <tr>
+              <td><a href="/agreements/<%= d.id %>"><%= d.doc_number %></a></td>
+              <td><%= new Date(d.issue_date).toLocaleDateString('en-GB') %></td>
+              <td><%= d.customer_name %></td>
+              <td><code><%= d.verification_code %></code></td>
+              <td><span class="badge badge-<%= d.status %>"><%= d.status %></span></td>
+              <td><a class="btn btn-sm" href="/agreements/<%= d.id %>">View</a></td>
+            </tr>
+          <% }) %>
+          <% if (!documents.length) { %>
+            <tr><td colspan="6" style="color:#94a3b8; text-align:center; padding:30px;">No agreement forms match your search.</td></tr>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+<%- include('../partials/footer') %>
