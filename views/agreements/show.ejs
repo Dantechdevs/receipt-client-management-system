@@ -1,0 +1,92 @@
+<%- include('../partials/header', { title: doc.doc_number }) %>
+  <div class="topbar">
+    <h1><%= doc.doc_number %> <span class="badge badge-<%= doc.status %>"><%= doc.status %></span></h1>
+    <div style="display:flex; gap:8px; flex-wrap:wrap;">
+      <% if (!config.lockedStatuses.includes(doc.status)) { %>
+        <a class="btn" href="/agreements/<%= doc.id %>/edit">Edit</a>
+      <% } %>
+      <a class="btn" href="/agreements/<%= doc.id %>/pdf" target="_blank">Download PDF</a>
+      <a class="btn" href="/agreements/<%= doc.id %>/pdf?duplicate=1" target="_blank">Print Duplicate</a>
+      <form method="POST" action="/agreements/<%= doc.id %>/duplicate" style="display:inline;">
+        <button class="btn" type="submit">Duplicate</button>
+      </form>
+      <% if (doc.status !== 'void') { %>
+      <form method="POST" action="/agreements/<%= doc.id %>/void" style="display:inline;" onsubmit="return confirm('Void this agreement? This cannot be undone.');">
+        <button class="btn btn-danger" type="submit">Void</button>
+      </form>
+      <% } %>
+    </div>
+  </div>
+  <div class="content">
+    <div class="grid grid-2">
+      <div class="card">
+        <h3 style="margin-top:0;">Agreement Info</h3>
+        <p><strong>Agreement No:</strong> <%= doc.doc_number %></p>
+        <p><strong>Verification Code:</strong> <code><%= doc.verification_code %></code></p>
+        <p><strong>Date:</strong> <%= new Date(doc.issue_date).toLocaleString('en-GB') %></p>
+        <% if (doc.effective_date) { %><p><strong>Effective Date:</strong> <%= new Date(doc.effective_date).toLocaleDateString('en-GB') %></p><% } %>
+        <p><strong>Status:</strong> <span class="badge badge-<%= doc.status %>"><%= doc.status %></span></p>
+      </div>
+      <div class="card">
+        <h3 style="margin-top:0;">Client</h3>
+        <p><strong>Name:</strong> <%= doc.customer_name %></p>
+        <p><strong>Phone:</strong> <%= doc.customer_phone || '—' %></p>
+        <p><strong>Address:</strong> <%= doc.customer_address || '—' %></p>
+        <% if (doc.client_id) { %><p><a href="/clients/<%= doc.client_id %>">View client profile →</a></p><% } %>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:16px;">
+      <h3 style="margin-top:0;">Parties & Signatories</h3>
+      <table class="data-table">
+        <thead><tr><th>Role</th><th>Name</th><th>Phone</th></tr></thead>
+        <tbody>
+          <% parties.forEach(p => { %>
+            <tr><td><%= p.role %></td><td><%= p.name %></td><td><%= p.phone || '—' %></td></tr>
+          <% }) %>
+          <% if (!parties.length) { %><tr><td colspan="3" style="color:#94a3b8;">No parties added.</td></tr><% } %>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card" style="margin-top:16px;">
+      <h3 style="margin-top:0;">Terms & Clauses</h3>
+      <% if (clauses.length) { %>
+        <% clauses.forEach((c, idx) => { %>
+          <p style="margin:0 0 4px;"><strong><%= idx + 1 %>. <%= c.title %></strong></p>
+          <p style="margin:0 0 14px; color:#475569;"><%= c.body %></p>
+        <% }) %>
+      <% } else { %>
+        <p style="color:#94a3b8;">No clauses added.</p>
+      <% } %>
+    </div>
+
+    <% if (items.length) { %>
+    <div class="card" style="margin-top:16px;">
+      <h3 style="margin-top:0;">Pricing Schedule</h3>
+      <table class="data-table">
+        <thead><tr><th>Description</th><th>Qty</th><th>Unit Price</th><th>Line Total</th></tr></thead>
+        <tbody>
+          <% items.forEach(it => { %>
+            <tr>
+              <td><%= it.description %></td>
+              <td><%= it.quantity %></td>
+              <td><%= it.unit_price.toLocaleString('en-KE',{minimumFractionDigits:2}) %></td>
+              <td><%= it.line_total.toLocaleString('en-KE',{minimumFractionDigits:2}) %></td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+      <div style="text-align:right; margin-top:14px; font-size:16px; font-weight:700;">
+        Total: KES <%= doc.total.toLocaleString('en-KE',{minimumFractionDigits:2}) %>
+      </div>
+    </div>
+    <% } %>
+
+    <% if (doc.notes) { %>
+      <div class="card" style="margin-top:16px;">
+        <p style="margin:0; color:#475569;"><strong>Notes:</strong> <%= doc.notes %></p>
+      </div>
+    <% } %>
+  </div>
+<%- include('../partials/footer') %>
