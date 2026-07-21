@@ -1,0 +1,40 @@
+<%- include('../partials/header', { title: clientRecord.name }) %>
+  <div class="topbar">
+    <h1><%= clientRecord.name %></h1>
+    <a class="btn" href="/clients/<%= clientRecord.id %>/edit">Edit Client</a>
+  </div>
+  <div class="content">
+    <div class="grid grid-4">
+      <div class="card stat-card"><div class="stat-label">Phone</div><div class="stat-value" style="font-size:16px;"><%= clientRecord.phone || '—' %></div></div>
+      <div class="card stat-card"><div class="stat-label">Address</div><div class="stat-value" style="font-size:16px;"><%= clientRecord.address || '—' %></div></div>
+      <div class="card stat-card"><div class="stat-label">Total Receipts</div><div class="stat-value"><%= counts.receipt %></div></div>
+      <div class="card stat-card"><div class="stat-label">Total Spent (Final)</div><div class="stat-value">KES <%= totalSpent.toLocaleString('en-KE',{minimumFractionDigits:2}) %></div></div>
+    </div>
+
+    <div class="grid grid-4" style="margin-top:16px;">
+      <div class="card stat-card"><div class="stat-label">Quotations</div><div class="stat-value"><%= counts.quotation %></div></div>
+      <div class="card stat-card"><div class="stat-label">Invoices</div><div class="stat-value"><%= counts.invoice %></div></div>
+      <div class="card stat-card"><div class="stat-label">Receipts</div><div class="stat-value"><%= counts.receipt %></div></div>
+      <div class="card stat-card"><div class="stat-label">Agreements</div><div class="stat-value"><%= counts.agreement %></div></div>
+    </div>
+
+    <div class="card" style="margin-top:20px;">
+      <h3 style="margin-top:0;">Document History</h3>
+      <table class="data-table">
+        <thead><tr><th>Number</th><th>Type</th><th>Date</th><th>Status</th><th>Total</th></tr></thead>
+        <tbody>
+          <% documents.forEach(d => { %>
+            <tr>
+              <td><a href="/<%= d.doc_type %>s/<%= d.id %>"><%= d.doc_number %></a></td>
+              <td style="text-transform:capitalize;"><%= d.doc_type %></td>
+              <td><%= new Date(d.issue_date).toLocaleDateString('en-GB') %></td>
+              <td><span class="badge badge-<%= d.status %>"><%= d.status %></span></td>
+              <td>KES <%= d.total.toLocaleString('en-KE',{minimumFractionDigits:2}) %></td>
+            </tr>
+          <% }) %>
+          <% if (!documents.length) { %><tr><td colspan="5" style="color:#94a3b8;">No documents yet.</td></tr><% } %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+<%- include('../partials/footer') %>
