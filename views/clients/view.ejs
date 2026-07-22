@@ -1,0 +1,32 @@
+<%- include('../partials/header', { title: client.name }) %>
+  <div class="topbar">
+    <h1><%= client.name %></h1>
+    <a class="btn" href="/clients/<%= client.id %>/edit">Edit Client</a>
+  </div>
+  <div class="content">
+    <div class="grid grid-4">
+      <div class="card stat-card"><div class="stat-label">Phone</div><div class="stat-value" style="font-size:16px;"><%= client.phone || '—' %></div></div>
+      <div class="card stat-card"><div class="stat-label">Address</div><div class="stat-value" style="font-size:16px;"><%= client.address || '—' %></div></div>
+      <div class="card stat-card"><div class="stat-label">Total Receipts</div><div class="stat-value"><%= receipts.length %></div></div>
+      <div class="card stat-card"><div class="stat-label">Total Spent (Final)</div><div class="stat-value">KES <%= totalSpent.toLocaleString('en-KE',{minimumFractionDigits:2}) %></div></div>
+    </div>
+
+    <div class="card" style="margin-top:20px;">
+      <h3 style="margin-top:0;">Transaction History</h3>
+      <table class="data-table">
+        <thead><tr><th>Receipt No.</th><th>Date</th><th>Status</th><th>Total</th></tr></thead>
+        <tbody>
+          <% receipts.forEach(r => { %>
+            <tr>
+              <td><a href="/receipts/<%= r.id %>"><%= r.receipt_number %></a></td>
+              <td><%= new Date(r.issue_date).toLocaleDateString('en-GB') %></td>
+              <td><span class="badge badge-<%= r.status %>"><%= r.status %></span></td>
+              <td>KES <%= r.total.toLocaleString('en-KE',{minimumFractionDigits:2}) %></td>
+            </tr>
+          <% }) %>
+          <% if (!receipts.length) { %><tr><td colspan="4" style="color:#94a3b8;">No transactions yet.</td></tr><% } %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+<%- include('../partials/footer') %>
