@@ -1,0 +1,70 @@
+<%- include('../partials/header', { title: 'Reports' }) %>
+  <div class="topbar"><h1>Reports</h1></div>
+  <div class="content">
+    <form class="search-bar" method="GET" action="/reports">
+      <select name="docType">
+        <% docTypes.forEach(t => { %>
+          <option value="<%= t.value %>" <%= docType === t.value ? 'selected' : '' %>><%= t.label %></option>
+        <% }) %>
+      </select>
+      <select name="period">
+        <option value="">Custom range</option>
+        <option value="daily" <%= period === 'daily' ? 'selected' : '' %>>Daily</option>
+        <option value="weekly" <%= period === 'weekly' ? 'selected' : '' %>>Weekly</option>
+        <option value="monthly" <%= period === 'monthly' ? 'selected' : '' %>>Monthly</option>
+      </select>
+      <input type="date" name="from" value="<%= from %>">
+      <input type="date" name="to" value="<%= to %>">
+      <button class="btn" type="submit">Run Report</button>
+      <a class="btn" href="/reports/export/excel?docType=<%= docType %>&period=<%= period %>&from=<%= from %>&to=<%= to %>">Export Excel</a>
+      <a class="btn" href="/reports/export/pdf?docType=<%= docType %>&period=<%= period %>&from=<%= from %>&to=<%= to %>">Export PDF</a>
+    </form>
+
+    <% if (documents.length) { %>
+      <div class="card" style="margin-bottom:20px;">
+        <p style="margin:0;"><strong><%= documents.length %></strong> <%= config.labelPlural.toLowerCase() %> found · Total value: <strong>KES <%= revenue.toLocaleString('en-KE',{minimumFractionDigits:2}) %></strong></p>
+      </div>
+      <div class="card" style="margin-bottom:20px;">
+        <table class="data-table">
+          <thead><tr><th><%= config.label %> No.</th><th>Client</th><th>Date</th><th>Status</th><th>Total</th></tr></thead>
+          <tbody>
+            <% documents.forEach(d => { %>
+              <tr>
+                <td><a href="<%= config.basePath %>/<%= d.id %>"><%= d.doc_number %></a></td>
+                <td><%= d.customer_name %></td>
+                <td><%= new Date(d.issue_date).toLocaleDateString('en-GB') %></td>
+                <td><span class="badge badge-<%= d.status %>"><%= d.status %></span></td>
+                <td>KES <%= d.total.toLocaleString('en-KE',{minimumFractionDigits:2}) %></td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    <% } %>
+
+    <div class="grid grid-2">
+      <div class="card">
+        <h3 style="margin-top:0;">Top Clients by Spend</h3>
+        <table class="data-table">
+          <thead><tr><th>Client</th><th>Documents</th><th>Total Spent (Receipts)</th></tr></thead>
+          <tbody>
+            <% clientReport.forEach(c => { %>
+              <tr><td><%= c.name %></td><td><%= c.doc_count %></td><td>KES <%= Number(c.total_spent).toLocaleString('en-KE',{minimumFractionDigits:2}) %></td></tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+      <div class="card">
+        <h3 style="margin-top:0;"><%= config.label %> Status Breakdown</h3>
+        <table class="data-table">
+          <thead><tr><th>Status</th><th>Count</th></tr></thead>
+          <tbody>
+            <% verificationStats.forEach(v => { %>
+              <tr><td><span class="badge badge-<%= v.status %>"><%= v.status %></span></td><td><%= v.count %></td></tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+<%- include('../partials/footer') %>
