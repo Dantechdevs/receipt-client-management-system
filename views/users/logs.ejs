@@ -1,0 +1,22 @@
+<%- include('../partials/header', { title: 'Activity Logs' }) %>
+  <div class="topbar"><h1>Activity Logs</h1></div>
+  <div class="content">
+    <div class="card">
+      <table class="data-table">
+        <thead><tr><th>Time</th><th>User</th><th>Action</th><th>Entity</th><th>Details</th></tr></thead>
+        <tbody>
+          <% logs.forEach(l => { %>
+            <tr>
+              <td><%= l.created_at %></td>
+              <td><%= l.user_name || 'System' %></td>
+              <td><%= l.action %></td>
+              <td><%= l.entity ? `${l.entity} #${l.entity_id}` : '—' %></td>
+              <td style="font-size:11.5px; color:#64748b;"><%= l.details || '' %></td>
+            </tr>
+          <% }) %>
+          <% if (!logs.length) { %><tr><td colspan="5" style="color:#94a3b8;">No activity recorded yet.</td></tr><% } %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+<%- include('../partials/footer') %>
