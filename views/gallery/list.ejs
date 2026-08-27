@@ -1,0 +1,53 @@
+<%- include('../partials/header', { title: 'Website Photos' }) %>
+  <div class="topbar"><h1>Website Photos</h1></div>
+  <div class="content">
+    <p style="color:#64748b; font-size:13px; max-width:640px; margin-top:-4px;">
+      These are the photos shown in the "Recent Work" gallery on the public website's homepage.
+      Add a photo below and it appears on the site right away — no developer needed.
+    </p>
+
+    <% if (error) { %><div class="alert alert-error"><%= error %></div><% } %>
+
+    <div class="card" style="max-width:520px;">
+      <h3 style="margin-top:0;">Add a Photo</h3>
+      <form method="POST" action="/gallery" enctype="multipart/form-data">
+        <div class="form-group">
+          <label>Photo</label>
+          <input class="form-control" type="file" name="photo" accept="image/*" required>
+        </div>
+        <div class="form-group">
+          <label>Caption</label>
+          <input class="form-control" name="caption" placeholder="e.g. Borehole drilling in Kitengela" maxlength="120">
+        </div>
+        <button class="btn btn-primary" type="submit">Add to Website</button>
+      </form>
+    </div>
+
+    <h3 style="margin-top:28px;">Current Photos (<%= photos.length %>)</h3>
+    <% if (photos.length === 0) { %>
+      <p style="color:#94a3b8;">No photos yet — the Recent Work section on the site will be empty until you add one.</p>
+    <% } else { %>
+      <div class="grid grid-3" style="margin-top:12px;">
+        <% photos.forEach(function(photo, i) { %>
+          <div class="card" style="padding:12px;">
+            <img src="<%= photo.image_path %>" style="width:100%; height:160px; object-fit:cover; border-radius:6px; margin-bottom:8px;">
+            <div style="font-size:13px; font-weight:600; margin-bottom:8px; min-height:18px;"><%= photo.caption || '(no caption)' %></div>
+            <div style="display:flex; gap:6px; flex-wrap:wrap;">
+              <form method="POST" action="/gallery/<%= photo.id %>/move" style="display:inline;">
+                <input type="hidden" name="direction" value="up">
+                <button class="btn btn-sm" type="submit" <%= i === 0 ? 'disabled' : '' %>>↑ Move up</button>
+              </form>
+              <form method="POST" action="/gallery/<%= photo.id %>/move" style="display:inline;">
+                <input type="hidden" name="direction" value="down">
+                <button class="btn btn-sm" type="submit" <%= i === photos.length - 1 ? 'disabled' : '' %>>↓ Move down</button>
+              </form>
+              <form method="POST" action="/gallery/<%= photo.id %>/delete" style="display:inline;" onsubmit="return confirm('Remove this photo from the website?');">
+                <button class="btn btn-sm btn-danger" type="submit">Remove</button>
+              </form>
+            </div>
+          </div>
+        <% }); %>
+      </div>
+    <% } %>
+  </div>
+<%- include('../partials/footer') %>
