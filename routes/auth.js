@@ -5,6 +5,13 @@ const crypto = require('crypto');
 const db = require('../db/db');
 const { logActivity } = require('../lib/helpers');
 
+// In-memory brute-force guard: 5 failed attempts per email+IP locks for 15 min.
+// Fine for a single-process/local deployment. If you ever scale to multiple
+// instances behind a load balancer, swap this for express-rate-limit + Redis.
+const loginAttempts = new Map();
+const MAX_ATTEMPTS = 5;
+const LOCKOUT_MS = 15 * 60 * 1000;
+
 router.get('/login', (req, res) => {
   if (req.session.user) return res.redirect('/dashboard');
   const company = db.prepare('SELECT name, logo_path FROM company WHERE id = 1').get();
@@ -13,13 +20,30 @@ router.get('/login', (req, res) => {
 
 router.post('/login', (req, res) => {
   const { email, password } = req.body;
-  const user = db.prepare('SELECT * FROM users WHERE email = ? AND active = 1').get(email);
   const company = db.prepare('SELECT name, logo_path FROM company WHERE id = 1').get();
+  const key = `${email}:${req.ip}`;
+  const now = Date.now();
+  const entry = loginAttempts.get(key);
+
+  if (entry && entry.count >= MAX_ATTEMPTS && now < entry.resetAt) {
+    return res.render('login', { error: 'Too many failed attempts. Try again in a few minutes.', company });
+  }
+
+  const user = db.prepare('SELECT * FROM users WHERE email = ? AND active = 1').get(email);
   if (!user || !bcrypt.compareSync(password || '', user.password_hash)) {
+    loginAttempts.set(key, { count: (entry ? entry.count : 0) + 1, resetAt: now + LOCKOUT_MS });
     logActivity(user ? user.id : null, 'login_failed', 'user', user ? user.id : null, { email });
     return res.render('login', { error: 'Invalid email or password.', company });
   }
+
+  loginAttempts.delete(key);
   req.session.user = { id: user.id, name: user.name, email: user.email, role: user.role };
+
+  // "Remember me" — extend session cookie lifetime if the box was checked
+  if (req.body.remember) {
+    req.session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000; // 30 days
+  }
+
   logActivity(user.id, 'login', 'user', user.id, null);
   res.redirect('/dashboard');
 });
@@ -64,8 +88,8 @@ router.post('/reset-password/:token', (req, res) => {
   }
 
   const { password, confirm } = req.body;
-  if (!password || password.length < 6) {
-    return res.render('reset-password', { token: req.params.token, error: 'Password must be at least 6 characters.' });
+  if (!password || password.length < 8) {
+    return res.render('reset-password', { token: req.params.token, error: 'Password must be at least 8 characters.' });
   }
   if (password !== confirm) {
     return res.render('reset-password', { token: req.params.token, error: 'Passwords do not match.' });
