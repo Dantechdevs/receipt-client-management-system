@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://jamarianpowersolution.co.ke/sitemap.xml
