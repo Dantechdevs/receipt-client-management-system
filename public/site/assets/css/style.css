@@ -370,3 +370,12 @@ textarea.form-control { resize: vertical; min-height: 110px; }
   align-items: center;
 }
 .payment-strip-img img { height: 26px; display: block; }
+
+/* --- Combine follow-us and payment rows into one line (added) --- */
+.social-row {
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+.social-row .payment-strip-img {
+  margin: 0;
+}
