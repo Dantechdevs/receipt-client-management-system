@@ -5,6 +5,17 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Jamarian Power Solution — Borehole Drilling, Solar & CCTV in Kenya</title>
 <meta name="description" content="Borehole drilling up to 200m, solar-powered pumping systems, and CCTV installation for homes, farms, and businesses across Kenya.">
+<link rel="canonical" href="https://jamarianpowersolution.co.ke/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Jamarian Power Solution — Borehole Drilling, Solar & CCTV in Kenya">
+<meta property="og:description" content="Borehole drilling up to 200m, solar-powered pumping systems, and CCTV installation for homes, farms, and businesses across Kenya.">
+<meta property="og:url" content="https://jamarianpowersolution.co.ke/">
+<meta property="og:image" content="https://jamarianpowersolution.co.ke/assets/images/borehole.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Jamarian Power Solution — Borehole Drilling, Solar & CCTV in Kenya">
+<meta name="twitter:description" content="Borehole drilling up to 200m, solar-powered pumping systems, and CCTV installation for homes, farms, and businesses across Kenya.">
+<meta name="twitter:image" content="https://jamarianpowersolution.co.ke/assets/images/borehole.png">
+<link rel="icon" type="image/jpeg" href="assets/images/logo.jpeg">
 <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
@@ -80,7 +91,7 @@
     <p class="section-intro">Most of our clients need more than one of these at the same site — a borehole with a solar pump, or a new build wired and fitted with cameras before handover. We plan them together so nothing gets rebuilt twice.</p>
 
     <div class="service-row">
-      <img class="service-photo" src="assets/images/borehole.png" alt="Borehole drilling in progress">
+      <img class="service-photo" src="assets/images/borehole.png" alt="Borehole drilling in progress" loading="lazy">
       <div class="service-body">
         <h3>Borehole Drilling</h3>
         <p>We survey the site, drill and case the borehole, and test the yield before we hand it over — so you know what you're getting before you rely on it.</p>
@@ -95,7 +106,7 @@
     </div>
 
     <div class="service-row">
-      <img class="service-photo" src="assets/images/solar.png" alt="Solar pump equipment">
+      <img class="service-photo" src="assets/images/solar.png" alt="Solar pump equipment" loading="lazy">
       <div class="service-body">
         <h3>Solar Power Systems</h3>
         <p>Submersible solar pumps for sites with no grid power, plus panel and inverter installations sized to what you're actually running — a pump, a home, or a small business.</p>
@@ -110,7 +121,7 @@
     </div>
 
     <div class="service-row">
-      <img class="service-photo" src="assets/images/cctv.png" alt="CCTV camera installation">
+      <img class="service-photo" src="assets/images/cctv.png" alt="CCTV camera installation" loading="lazy">
       <div class="service-body">
         <h3>CCTV & Security</h3>
         <p>Camera systems for gates, compounds, warehouses, and offices — set up with remote viewing on your phone before we leave the site.</p>
@@ -125,7 +136,7 @@
     </div>
 
     <div class="service-row">
-      <img class="service-photo" src="assets/images/plumbing-electrical.png" alt="Plumbing and electrical panel work on site">
+      <img class="service-photo" src="assets/images/plumbing-electrical.png" alt="Plumbing and electrical panel work on site" loading="lazy">
       <div class="service-body">
         <h3>Electrical, Plumbing & Construction</h3>
         <p>General electrical wiring, plumbing, and construction works — usually bundled into a borehole or solar project, but available on their own too.</p>
@@ -151,15 +162,15 @@
        (/gallery) — no editing of this file is needed to update them. -->
   <div class="work-strip" id="work-strip">
     <figure>
-      <img src="assets/images/borehole.png" alt="Borehole drilling site">
+      <img src="assets/images/borehole.png" alt="Borehole drilling site" loading="lazy">
       <figcaption>Borehole drilling in progress</figcaption>
     </figure>
     <figure>
-      <img src="assets/images/solar.png" alt="Solar pumping equipment">
+      <img src="assets/images/solar.png" alt="Solar pumping equipment" loading="lazy">
       <figcaption>Solar pumping equipment</figcaption>
     </figure>
     <figure>
-      <img src="assets/images/cctv.png" alt="CCTV installation">
+      <img src="assets/images/cctv.png" alt="CCTV installation" loading="lazy">
       <figcaption>CCTV installation</figcaption>
     </figure>
   </div>
@@ -173,7 +184,7 @@
       container.innerHTML = photos.map(function (p) {
         var caption = (p.caption || '').replace(/</g, '&lt;');
         var src = p.image_path.replace(/"/g, '&quot;');
-        return '<figure><img src="' + src + '" alt="' + caption + '"><figcaption>' + caption + '</figcaption></figure>';
+        return '<figure><img src="' + src + '" alt="' + caption + '" loading="lazy"><figcaption>' + caption + '</figcaption></figure>';
       }).join('');
     })
     .catch(function () { /* no backend reachable — fallback photos stay as-is */ });
