@@ -6,3 +6,4 @@ db/sessions.sqlite
 public/uploads/*
 !public/uploads/.gitkeep
 *.log
+.env

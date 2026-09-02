@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const session = require('express-session');
 const FileStore = require('session-file-store')(session);
@@ -30,9 +31,15 @@ app.use('/uploads', express.static(path.join(__dirname, 'public', 'uploads')));
 // the app's login/dashboard redirect.
 app.use(express.static(path.join(__dirname, 'public', 'site')));
 
+if (!process.env.SESSION_SECRET || process.env.SESSION_SECRET === 'receipt-system-secret-change-me') {
+  console.error('FATAL: SESSION_SECRET is missing or still set to the placeholder value.');
+  console.error('Set a real random value in your .env file before starting the server.');
+  process.exit(1);
+}
+
 app.use(session({
   store: new FileStore({ path: path.join(__dirname, 'db', 'sessions') }),
-  secret: 'receipt-system-secret-change-me',
+  secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
   cookie: { maxAge: 1000 * 60 * 60 * 8 }
