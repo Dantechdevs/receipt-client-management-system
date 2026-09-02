@@ -4,7 +4,8 @@
     <a href="/agreements" class="btn">Cancel</a>
   </div>
   <div class="content">
-    <form method="POST" action="<%= doc ? `/agreements/${doc.id}?_method=PUT` : '/agreements' %>" id="agreementForm">
+    <form method="POST" action="<%= doc ? `/agreements/${doc.id}?_method=PUT` : '/agreements' %>
+  <input type="hidden" name="_csrf" value="<%= csrfToken %>">" id="agreementForm">
       <div class="grid grid-2">
         <div class="card">
           <h3 style="margin-top:0;">Client Details</h3>

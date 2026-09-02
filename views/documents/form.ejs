@@ -4,7 +4,8 @@
     <a href="<%= config.basePath %>" class="btn">Cancel</a>
   </div>
   <div class="content">
-    <form method="POST" action="<%= doc ? `${config.basePath}/${doc.id}?_method=PUT` : config.basePath %>" id="docForm">
+    <form method="POST" action="<%= doc ? `${config.basePath}/${doc.id}?_method=PUT` : config.basePath %>
+  <input type="hidden" name="_csrf" value="<%= csrfToken %>">" id="docForm">
       <div class="grid grid-2">
         <div class="card">
           <h3 style="margin-top:0;">Customer Details</h3>

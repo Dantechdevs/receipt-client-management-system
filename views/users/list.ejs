@@ -13,7 +13,8 @@
                 <td><%= u.name %></td>
                 <td><%= u.email %></td>
                 <td>
-                  <form method="POST" action="/users/<%= u.id %>/role" style="display:inline;">
+                  <form method="POST" action="/users/<%= u.id %>
+  <input type="hidden" name="_csrf" value="<%= csrfToken %>">/role" style="display:inline;">
                     <select name="role" onchange="this.form.submit()" style="padding:3px 6px; border-radius:4px; border:1px solid #e2e8f0;">
                       <option value="admin" <%= u.role==='admin'?'selected':'' %>>Administrator</option>
                       <option value="cashier" <%= u.role==='cashier'?'selected':'' %>>Receptionist/Cashier</option>
@@ -22,7 +23,8 @@
                 </td>
                 <td><span class="badge <%= u.active ? 'badge-final' : 'badge-void' %>"><%= u.active ? 'Active' : 'Disabled' %></span></td>
                 <td>
-                  <form method="POST" action="/users/<%= u.id %>/toggle-active" style="display:inline;">
+                  <form method="POST" action="/users/<%= u.id %>
+  <input type="hidden" name="_csrf" value="<%= csrfToken %>">/toggle-active" style="display:inline;">
                     <button class="btn btn-sm" type="submit"><%= u.active ? 'Disable' : 'Enable' %></button>
                   </form>
                 </td>
@@ -34,6 +36,7 @@
       <div class="card">
         <h3 style="margin-top:0;">Add User</h3>
         <form method="POST" action="/users">
+  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
           <div class="form-group"><label>Full Name</label><input class="form-control" name="name" required></div>
           <div class="form-group"><label>Email</label><input class="form-control" type="email" name="email" required></div>
           <div class="form-group"><label>Password</label><input class="form-control" type="password" name="password" required minlength="6"></div>

@@ -5,7 +5,8 @@
   </div>
   <div class="content">
     <div class="card" style="max-width:500px;">
-      <form method="POST" action="/clients/<%= clientRecord.id %>?_method=PUT">
+      <form method="POST" action="/clients/<%= clientRecord.id %>
+  <input type="hidden" name="_csrf" value="<%= csrfToken %>">?_method=PUT">
         <div class="form-group">
           <label>Name</label>
           <input class="form-control" type="text" name="name" value="<%= clientRecord.name %>" required>

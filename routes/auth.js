@@ -13,6 +13,12 @@ const loginAttempts = new Map();
 const MAX_ATTEMPTS = 5;
 const LOCKOUT_MS = 15 * 60 * 1000;
 
+// Separate, looser limiter for forgot-password to slow down email enumeration
+// and mass token-generation abuse.
+const forgotAttempts = new Map();
+const FORGOT_MAX = 5;
+const FORGOT_WINDOW_MS = 15 * 60 * 1000;
+
 router.get('/login', (req, res) => {
   if (req.session.user) return res.redirect('/dashboard');
   const company = db.prepare('SELECT name, logo_path FROM company WHERE id = 1').get();
@@ -62,10 +68,23 @@ router.get('/forgot-password', (req, res) => {
 
 router.post('/forgot-password', async (req, res) => {
   const { email } = req.body;
+  const key = req.ip;
+  const now = Date.now();
+  const entry = forgotAttempts.get(key);
+  const GENERIC_MESSAGE = 'If an account exists with that email, a reset link has been sent.';
+
+  if (entry && entry.count >= FORGOT_MAX && now < entry.resetAt) {
+    return res.render('forgot-password', { error: 'Too many requests. Try again in a few minutes.', message: null, resetLink: null });
+  }
+  forgotAttempts.set(key, { count: (entry ? entry.count : 0) + 1, resetAt: now + FORGOT_WINDOW_MS });
+
   const user = db.prepare('SELECT * FROM users WHERE email = ?').get(email);
   if (!user) {
-    return res.render('forgot-password', { error: 'No account with that email.', message: null, resetLink: null });
+    // Same response whether or not the account exists — avoids confirming
+    // registered emails to an attacker.
+    return res.render('forgot-password', { message: GENERIC_MESSAGE, error: null, resetLink: null });
   }
+
   const token = crypto.randomBytes(20).toString('hex');
   const expires = Date.now() + 1000 * 60 * 30; // 30 min
   db.prepare('UPDATE users SET reset_token = ?, reset_token_expires = ? WHERE id = ?').run(token, expires, user.id);
@@ -75,13 +94,16 @@ router.post('/forgot-password', async (req, res) => {
   if (process.env.SENDGRID_API_KEY) {
     try {
       await mail.sendPasswordReset({ to: user.email, resetUrl, userName: user.name });
-      return res.render('forgot-password', { message: 'A reset link has been sent to your email.', error: null, resetLink: null });
+      return res.render('forgot-password', { message: GENERIC_MESSAGE, error: null, resetLink: null });
     } catch (err) {
       logActivity(user.id, 'password_reset_email_failed', 'user', user.id, { error: err.message });
     }
   }
 
-  res.render('forgot-password', { message: 'Reset link generated below (in production this would be emailed).', error: null, resetLink: `/reset-password/${token}` });
+  // Dev fallback only reached when SendGrid isn't configured, or the send
+  // failed above. This still visibly confirms the account exists via the
+  // link itself — acceptable for local dev, not for production.
+  res.render('forgot-password', { message: GENERIC_MESSAGE + ' (Dev mode — no email configured, link shown below.)', error: null, resetLink: `/reset-password/${token}` });
 });
 
 router.get('/reset-password/:token', (req, res) => {

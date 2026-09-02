@@ -4,6 +4,7 @@ const session = require('express-session');
 const FileStore = require('session-file-store')(session);
 const methodOverride = require('method-override');
 const path = require('path');
+const crypto = require('crypto');
 
 require('./db/db'); // init db
 
@@ -49,6 +50,30 @@ app.use(session({
 app.use((req, res, next) => {
   res.locals.currentUser = req.session.user || null;
   res.locals.path = req.path;
+  next();
+});
+
+// CSRF protection: one token per session, verified on every state-changing
+// request. GET/HEAD/OPTIONS and the public JSON API are exempt.
+app.use((req, res, next) => {
+  if (!req.session.csrfToken) {
+    req.session.csrfToken = crypto.randomBytes(24).toString('hex');
+  }
+  res.locals.csrfToken = req.session.csrfToken;
+  next();
+});
+
+app.use((req, res, next) => {
+  const isSafeMethod = ['GET', 'HEAD', 'OPTIONS'].includes(req.method);
+  const isPublicApi = req.path.startsWith('/api/');
+  if (isSafeMethod || isPublicApi) return next();
+
+  const submittedToken = req.body && req.body._csrf;
+  if (!submittedToken || submittedToken !== req.session.csrfToken) {
+    return res.status(403).render('error', {
+      message: 'Your session has expired or this form was submitted incorrectly. Please go back, refresh the page, and try again.'
+    });
+  }
   next();
 });
 

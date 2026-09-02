@@ -3,6 +3,7 @@
   <div class="content">
     <% if (saved) { %><div class="alert alert-success">Settings saved successfully.</div><% } %>
     <form method="POST" action="/settings" enctype="multipart/form-data">
+  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
       <div class="grid grid-2">
         <div class="card">
           <h3 style="margin-top:0;">Company Details</h3>

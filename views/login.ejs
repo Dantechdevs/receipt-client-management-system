@@ -32,6 +32,7 @@
       <% if (error) { %><div class="alert alert-error" role="alert"><%= error %></div><% } %>
 
       <form method="POST" action="/login" id="loginForm" novalidate>
+  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
         <div class="form-group">
           <label for="email">Email</label>
           <input class="form-control" id="email" type="email" name="email" required autofocus autocomplete="email">
