@@ -4,6 +4,7 @@ const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
 const db = require('../db/db');
 const { logActivity } = require('../lib/helpers');
+const mail = require('../lib/mail');
 
 // In-memory brute-force guard: 5 failed attempts per email+IP locks for 15 min.
 // Fine for a single-process/local deployment. If you ever scale to multiple
@@ -59,7 +60,7 @@ router.get('/forgot-password', (req, res) => {
   res.render('forgot-password', { message: null, error: null, resetLink: null });
 });
 
-router.post('/forgot-password', (req, res) => {
+router.post('/forgot-password', async (req, res) => {
   const { email } = req.body;
   const user = db.prepare('SELECT * FROM users WHERE email = ?').get(email);
   if (!user) {
@@ -68,9 +69,19 @@ router.post('/forgot-password', (req, res) => {
   const token = crypto.randomBytes(20).toString('hex');
   const expires = Date.now() + 1000 * 60 * 30; // 30 min
   db.prepare('UPDATE users SET reset_token = ?, reset_token_expires = ? WHERE id = ?').run(token, expires, user.id);
-  // In a real system this would be emailed. We show the link directly since there's no mail server configured.
-  const resetLink = `/reset-password/${token}`;
-  res.render('forgot-password', { message: 'Reset link generated below (in production this would be emailed).', error: null, resetLink });
+
+  const resetUrl = `${process.env.APP_URL || `${req.protocol}://${req.get('host')}`}/reset-password/${token}`;
+
+  if (process.env.SENDGRID_API_KEY) {
+    try {
+      await mail.sendPasswordReset({ to: user.email, resetUrl, userName: user.name });
+      return res.render('forgot-password', { message: 'A reset link has been sent to your email.', error: null, resetLink: null });
+    } catch (err) {
+      logActivity(user.id, 'password_reset_email_failed', 'user', user.id, { error: err.message });
+    }
+  }
+
+  res.render('forgot-password', { message: 'Reset link generated below (in production this would be emailed).', error: null, resetLink: `/reset-password/${token}` });
 });
 
 router.get('/reset-password/:token', (req, res) => {
