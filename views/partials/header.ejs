@@ -6,7 +6,7 @@
   <title><%= typeof title !== 'undefined' ? title + ' – ' : '' %>Receipt & Client Manager</title>
   <link rel="stylesheet" href="/public/css/style.css">
 </head>
-<body>
+<body class="<%= path === '/verify' ? 'verify-page' : '' %>">
 <div class="app-shell">
   <aside class="sidebar">
     <div class="brand">🧾 ReceiptPro</div>
