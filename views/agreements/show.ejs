@@ -7,13 +7,13 @@
       <% } %>
       <a class="btn" href="/agreements/<%= doc.id %>/pdf" target="_blank">Download PDF</a>
       <a class="btn" href="/agreements/<%= doc.id %>/pdf?duplicate=1" target="_blank">Print Duplicate</a>
-      <form method="POST" action="/agreements/<%= doc.id %>
-  <input type="hidden" name="_csrf" value="<%= csrfToken %>">/duplicate" style="display:inline;">
+      <form method="POST" action="/agreements/<%= doc.id %>/duplicate" style="display:inline;">
+  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
         <button class="btn" type="submit">Duplicate</button>
       </form>
       <% if (doc.status !== 'void') { %>
-      <form method="POST" action="/agreements/<%= doc.id %>
-  <input type="hidden" name="_csrf" value="<%= csrfToken %>">/void" style="display:inline;" onsubmit="return confirm('Void this agreement? This cannot be undone.');">
+      <form method="POST" action="/agreements/<%= doc.id %>/void" style="display:inline;" onsubmit="return confirm('Void this agreement? This cannot be undone.');">
+  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
         <button class="btn btn-danger" type="submit">Void</button>
       </form>
       <% } %>

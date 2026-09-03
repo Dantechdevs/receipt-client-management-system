@@ -34,18 +34,18 @@
             <img src="<%= photo.image_path %>" style="width:100%; height:160px; object-fit:cover; border-radius:6px; margin-bottom:8px;">
             <div style="font-size:13px; font-weight:600; margin-bottom:8px; min-height:18px;"><%= photo.caption || '(no caption)' %></div>
             <div style="display:flex; gap:6px; flex-wrap:wrap;">
-              <form method="POST" action="/gallery/<%= photo.id %>
-  <input type="hidden" name="_csrf" value="<%= csrfToken %>">/move" style="display:inline;">
+              <form method="POST" action="/gallery/<%= photo.id %>/move" style="display:inline;">
+  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                 <input type="hidden" name="direction" value="up">
                 <button class="btn btn-sm" type="submit" <%= i === 0 ? 'disabled' : '' %>>↑ Move up</button>
               </form>
-              <form method="POST" action="/gallery/<%= photo.id %>
-  <input type="hidden" name="_csrf" value="<%= csrfToken %>">/move" style="display:inline;">
+              <form method="POST" action="/gallery/<%= photo.id %>/move" style="display:inline;">
+  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                 <input type="hidden" name="direction" value="down">
                 <button class="btn btn-sm" type="submit" <%= i === photos.length - 1 ? 'disabled' : '' %>>↓ Move down</button>
               </form>
-              <form method="POST" action="/gallery/<%= photo.id %>
-  <input type="hidden" name="_csrf" value="<%= csrfToken %>">/delete" style="display:inline;" onsubmit="return confirm('Remove this photo from the website?');">
+              <form method="POST" action="/gallery/<%= photo.id %>/delete" style="display:inline;" onsubmit="return confirm('Remove this photo from the website?');">
+  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                 <button class="btn btn-sm btn-danger" type="submit">Remove</button>
               </form>
             </div>
