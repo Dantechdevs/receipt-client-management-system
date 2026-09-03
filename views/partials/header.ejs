@@ -20,7 +20,7 @@
       <div class="section-label">Manage</div>
       <a class="nav-link <%= path && path.startsWith('/clients') ? 'active' : '' %>" href="/clients">Clients</a>
       <a class="nav-link <%= path && path.startsWith('/reports') ? 'active' : '' %>" href="/reports">Reports</a>
-      <a class="nav-link <%= path === '/verify' ? 'active' : '' %>" href="/verify" target="_blank">Verify a Document</a>
+      <a class="nav-link <%= path === '/verify' ? 'active' : '' %>" href="/verify">Verify a Document</a>
       <% if (currentUser && currentUser.role === 'admin') { %>
         <div class="section-label">Admin</div>
         <a class="nav-link <%= path === '/settings' ? 'active' : '' %>" href="/settings">Company Settings</a>
