@@ -4,8 +4,8 @@
     <a href="/receipts" class="btn">Cancel</a>
   </div>
   <div class="content">
-    <form method="POST" action="<%= receipt ? `/receipts/${receipt.id}?_method=PUT` : '/receipts' %>
-  <input type="hidden" name="_csrf" value="<%= csrfToken %>">" id="receiptForm">
+    <form method="POST" action="<%= receipt ? `/receipts/${receipt.id}?_method=PUT` : '/receipts' %>" id="receiptForm">
+  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
       <div class="grid grid-2">
         <div class="card">
           <h3 style="margin-top:0;">Customer Details</h3>
