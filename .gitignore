@@ -2,7 +2,8 @@ node_modules/
 db/data.sqlite
 db/data.sqlite-shm
 db/data.sqlite-wal
-db/sessions.sqlite
+db/sessions/*
+!db/sessions/.gitkeep
 public/uploads/*
 !public/uploads/.gitkeep
 *.log
