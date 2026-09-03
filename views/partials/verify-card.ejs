@@ -1,0 +1,40 @@
+<div class="card">
+  <form method="GET" action="/verify">
+    <div class="form-group">
+      <label>Document Number or Verification Code</label>
+      <input class="form-control" type="text" name="q" value="<%= searchTerm %>" placeholder="e.g. INV-2026-000125 or DTX7K9P2A5" required>
+    </div>
+    <button class="btn btn-primary" type="submit" style="width:100%;">Verify Document</button>
+  </form>
+</div>
+
+<% if (error) { %>
+  <div class="alert alert-error" style="margin-top:16px;"><%= error %></div>
+<% } %>
+
+<% if (searched && !error) { %>
+  <div style="margin-top:20px;">
+    <% if (doc && doc.status !== 'void') { %>
+      <div class="verify-status verify-valid">✔ VALID <%= config.label.toUpperCase() %></div>
+      <div class="card">
+        <p><strong><%= config.label %> Number:</strong> <%= doc.doc_number %></p>
+        <p><strong>Verification Code:</strong> <code><%= doc.verification_code %></code></p>
+        <p><strong>Client Name:</strong> <%= doc.customer_name %></p>
+        <p><strong>Date Issued:</strong> <%= new Date(doc.issue_date).toLocaleString('en-GB') %></p>
+        <% if (doc.total) { %><p><strong>Total Amount:</strong> KES <%= doc.total.toLocaleString('en-KE',{minimumFractionDigits:2}) %></p><% } %>
+        <p><strong>Status:</strong> <span class="badge badge-<%= doc.status %>">Valid — <%= doc.status %></span></p>
+      </div>
+    <% } else if (doc && doc.status === 'void') { %>
+      <div class="verify-status verify-invalid">✘ DOCUMENT VOIDED</div>
+      <div class="card">
+        <p><strong>Document Number:</strong> <%= doc.doc_number %></p>
+        <p>This document has been voided by the issuing company and is no longer valid.</p>
+      </div>
+    <% } else { %>
+      <div class="verify-status verify-invalid">✘ NOT FOUND</div>
+      <div class="card">
+        <p>No document matches that number or verification code. Please check the details and try again, or contact the issuing company.</p>
+      </div>
+    <% } %>
+  </div>
+<% } %>
