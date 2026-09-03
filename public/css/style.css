@@ -207,7 +207,7 @@ table.data-table tr:hover td { background: #f8fafc; }
   .sidebar {
     flex-shrink: 0;
   }
-  .content {
+  .main {
     min-width: 480px;
   }
 }
